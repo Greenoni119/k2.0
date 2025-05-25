@@ -1,103 +1,234 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+const PublicLayout = dynamic(() => import('../components/PublicLayout'), {
+  ssr: false
+});
+
+type Category = {
+  id: string;
+  name: string;
+  image_url: string;
+  created_at: string;
+  description: string;
+  slug: string;
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching categories:', error);
+          setError(error.message);
+          return;
+        }
+
+        console.log('Fetched categories:', data);
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error in fetchCategories:', error);
+        setError('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return (
+    <PublicLayout>
+      <main
+        style={{
+          maxWidth: '1500px',
+          margin: '0 auto',
+          padding: '40px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        {/* Logo */}
+        <div style={{ marginBottom: '48px' }}>
+          <Image
+            src="/logo.png"
+            alt="K2 Logo"
+            width={220}
+            height={120}
+            priority
+          />
         </div>
+
+        {/* Tagline */}
+        <p style={{
+          fontSize: '14px',
+          textAlign: 'center',
+          marginBottom: '48px',
+          fontFamily: 'Courier Prime, monospace'
+        }}>
+          Discover unique items for your home that will make you (and even your house) feel special
+        </p>
+
+        {/* Hero Image */}
+        <div className="w-full max-w-4xl mb-12">
+          <Image
+            src="/cactus.jpg"
+            alt="Desert landscape with cacti"
+            width={800}
+            height={400}
+            priority
+            className="w-full h-auto grayscale"
+          />
+        </div>
+
+        {/* Navigation */}
+        <div style={{
+          width: '100%',
+          borderBottom: '1px solid #000',
+          marginBottom: '48px'
+        }}>
+          <nav style={{
+            display: 'flex',
+            gap: '24px',
+            justifyContent: 'center',
+            marginBottom: '16px',
+            width: '100%'
+          }}>
+            <Link 
+              href="/about"
+              style={{
+                fontSize: '14px',
+                color: 'black',
+                textDecoration: 'none',
+                fontFamily: 'Courier Prime, monospace'
+              }}
+            >
+              About
+            </Link>
+            {categories.map((category) => (
+              <Link 
+                key={category.id}
+                href={`/${category.slug}`}
+                style={{
+                  fontSize: '14px',
+                  color: 'black',
+                  textDecoration: 'none',
+                  fontFamily: 'Courier Prime, monospace'
+                }}
+              >
+                {category.name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
+        {/* Shop By Category Section */}
+        <section style={{
+          width: '100%',
+          marginTop: '32px'
+        }}>
+          <h2 style={{
+            fontSize: '16px',
+            marginBottom: '32px',
+            fontFamily: 'Courier Prime, monospace',
+            textAlign: 'center'
+          }}>
+            Shop By Category
+          </h2>
+          
+          {loading && (
+            <p style={{ textAlign: 'center', fontFamily: 'Courier Prime, monospace' }}>
+              Loading categories...
+            </p>
+          )}
+          
+          {error && (
+            <p style={{ textAlign: 'center', color: 'red', fontFamily: 'Courier Prime, monospace' }}>
+              {error}
+            </p>
+          )}
+          
+          {!loading && !error && categories.length === 0 && (
+            <p style={{ textAlign: 'center', fontFamily: 'Courier Prime, monospace' }}>
+              No categories found.
+            </p>
+          )}
+          
+          {!loading && !error && categories.length > 0 && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '32px',
+              width: '100%',
+              maxWidth: '1100px',
+              margin: '0 auto'
+            }}>
+              {categories.map(category => (
+                <Link 
+                  key={category.id} 
+                  href={`/${category.slug}`}
+                  style={{
+                    position: 'relative',
+                    display: 'block',
+                    aspectRatio: '4/5',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <Image 
+                    src={category.image_url}
+                    alt={category.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    style={{
+                      objectFit: 'cover'
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4))'
+                  }}>
+                    <h3 style={{
+                      fontFamily: 'Courier Prime, monospace',
+                      fontSize: '24px',
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase',
+                      color: '#fff',
+                      margin: 0
+                    }}>
+                      {category.name}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </PublicLayout>
   );
 }
