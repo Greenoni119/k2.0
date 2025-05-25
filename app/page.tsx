@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, retryWithBackoff } from '@/utils/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -30,10 +30,12 @@ export default function Home() {
         setLoading(true);
         setError(null);
         
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('created_at', { ascending: true });
+        const { data, error } = await retryWithBackoff(async () => {
+          return await supabase
+            .from('categories')
+            .select('*')
+            .order('created_at', { ascending: true });
+        });
 
         if (error) {
           console.error('Error fetching categories:', error);
@@ -42,7 +44,7 @@ export default function Home() {
         }
 
         console.log('Fetched categories:', data);
-        setCategories(data || []);
+        setCategories(data as Category[]); // Cast data to Category[]
       } catch (error) {
         console.error('Error in fetchCategories:', error);
         setError('An unexpected error occurred');
