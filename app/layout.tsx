@@ -6,6 +6,8 @@ import ClientProviders from '../components/ClientProviders';
 const courierPrime = Courier_Prime({
   weight: ['400', '700'],
   subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-courier-prime',
 });
 
 export const metadata = {
@@ -20,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={courierPrime.className}>
+      <body className={`${courierPrime.variable} ${courierPrime.className}`}>
         <div style={{ 
           width: '100%', 
           height: '20px', 
