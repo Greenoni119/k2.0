@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Courier_Prime } from 'next/font/google';
 import './globals.css';
 import ClientProviders from '../components/ClientProviders';
+import { headers } from 'next/headers';
 
 const courierPrime = Courier_Prime({
   weight: ['400', '700'],
@@ -15,11 +16,16 @@ export const metadata = {
   description: 'Discover unique items for your home',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Get the current path to check if we're in admin section
+  const headersList = headers();
+  const pathname = headersList.get('x-pathname') || '';
+  const isAdminPage = pathname.startsWith('/admin');
+
   return (
     <html lang="en">
       <body className={`${courierPrime.variable} ${courierPrime.className}`}>
@@ -32,9 +38,13 @@ export default function RootLayout({
           left: 0,
           zIndex: 5
         }} />
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        {isAdminPage ? (
+          children
+        ) : (
+          <ClientProviders>
+            {children}
+          </ClientProviders>
+        )}
       </body>
     </html>
   );
