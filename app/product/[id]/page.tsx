@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Product } from '@/utils/supabase';
 import dynamic from 'next/dynamic';
@@ -229,8 +229,8 @@ export default function ProductPage({ params }: Props) {
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                size: selectedSize || 'one size',
-                image_url: product.image_url || ''
+                images: product.product_images?.map(img => img.url) || [product.image_url],
+                quantity: quantity
               });
             }}
             style={{

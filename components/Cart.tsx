@@ -1,24 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useCart } from '@/hooks/useCart';
+import CheckoutButton from './CheckoutButton';
 
-export type CartItem = {
-  id: string;
-  name: string;
-  price: number;
-  size: string;
-  quantity: number;
-  image_url: string;
-};
 
-type CartProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (itemId: string, size: string, newQuantity: number) => void;
-  onRemoveItem: (itemId: string, size: string) => void;
-};
 
-export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemoveItem }: CartProps) {
+export default function Cart() {
   const [mounted, setMounted] = useState(false);
+  const { items, updateQuantity, removeItem, isOpen, setIsOpen } = useCart();
 
   useEffect(() => {
     setMounted(true);
@@ -42,7 +30,7 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
             backgroundColor: 'rgba(0, 0, 0, 0.3)',
             zIndex: 1000,
           }}
-          onClick={onClose}
+          onClick={() => setIsOpen(false)}
         />
       )}
 
@@ -78,7 +66,7 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
             my cart
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => setIsOpen(false)}
             style={{
               background: 'none',
               border: 'none',
@@ -100,7 +88,7 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
         }}>
           {items.map((item) => (
             <div
-              key={`${item.id}-${item.size}`}
+              key={item.id}
               style={{
                 display: 'flex',
                 gap: '16px',
@@ -110,15 +98,17 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
                 borderBottom: '1px solid #eee'
               }}
             >
-              <img
-                src={item.image_url}
-                alt={item.name}
-                style={{
-                  width: '100px',
-                  height: '100px',
-                  objectFit: 'cover'
-                }}
-              />
+              {item.images?.[0] && (
+                <img
+                  src={item.images[0]}
+                  alt={item.name}
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    objectFit: 'cover'
+                  }}
+                />
+              )}
               <div style={{
                 flex: 1,
                 display: 'flex',
@@ -132,14 +122,7 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
                 }}>
                   {item.name}
                 </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '14px',
-                  color: '#666',
-                  fontFamily: 'Courier Prime, monospace'
-                }}>
-                  size: {item.size}
-                </p>
+
                 <p style={{
                   margin: 0,
                   fontSize: '16px',
@@ -153,33 +136,33 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
                   gap: '8px'
                 }}>
                   <button
-                    onClick={() => onUpdateQuantity(item.id, item.size, item.quantity - 1)}
+                    onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      width: '32px',
+                      height: '32px',
                       border: '1px solid #ddd',
-                      background: 'none',
-                      cursor: 'pointer'
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer',
+                      fontSize: '16px'
                     }}
                   >
                     -
                   </button>
                   <span style={{
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: '14px',
                     minWidth: '20px',
                     textAlign: 'center'
                   }}>
                     {item.quantity}
                   </span>
                   <button
-                    onClick={() => onUpdateQuantity(item.id, item.size, item.quantity + 1)}
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     style={{
-                      width: '24px',
-                      height: '24px',
+                      width: '32px',
+                      height: '32px',
                       border: '1px solid #ddd',
-                      background: 'none',
-                      cursor: 'pointer'
+                      backgroundColor: 'transparent',
+                      cursor: 'pointer',
+                      fontSize: '16px'
                     }}
                   >
                     +
@@ -187,7 +170,7 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
                 </div>
               </div>
               <button
-                onClick={() => onRemoveItem(item.id, item.size)}
+                onClick={() => removeItem(item.id)}
                 style={{
                   position: 'absolute',
                   bottom: '24px',
@@ -222,20 +205,7 @@ export default function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemov
             <span>subtotal</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
-          <button
-            style={{
-              width: '100%',
-              padding: '16px',
-              backgroundColor: '#C8B098',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: '16px'
-            }}
-          >
-            checkout
-          </button>
+          <CheckoutButton />
         </div>
       </div>
     </>
