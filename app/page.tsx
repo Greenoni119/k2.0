@@ -146,10 +146,11 @@ export default function Home() {
           marginTop: '32px'
         }}>
           <h2 style={{
-            fontSize: '16px',
+            fontSize: '25px',
             marginBottom: '32px',
             fontFamily: 'Courier Prime, monospace',
-            textAlign: 'center'
+            textAlign: 'center',
+            fontWeight: 'lighter'
           }}>
             Shop By Category
           </h2>
@@ -214,7 +215,7 @@ export default function Home() {
                   }}>
                     <h3 style={{
                       fontFamily: 'Courier Prime, monospace',
-                      fontSize: '24px',
+                      fontSize: '40px',
                       letterSpacing: '2px',
                       textTransform: 'uppercase',
                       color: '#fff',

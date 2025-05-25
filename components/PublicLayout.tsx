@@ -2,13 +2,21 @@
 
 import CartButton from './CartButton';
 import Navigation from './Navigation';
+import Footer from './Footer';
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       <CartButton />
       <Navigation />
-      {children}
-    </>
+      <div style={{ flex: 1 }}>
+        {children}
+      </div>
+      <Footer />
+    </div>
   );
 }
